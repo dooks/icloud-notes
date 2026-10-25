@@ -1,14 +1,16 @@
 //! Tauri host (WP-H): windows, login, the §3.4 commands and the `notes-asset://` protocol.
 //!
-//! Commands delegate to the backend held in Tauri state; until Wave 2 that is `mock::MockService`
-//! (same method names as `notes_service::Service`). Extra Rust-side parameters (`State`, `AppHandle`,
+//! Commands delegate to the backend held in Tauri state: `notes_service::Service`, or with the `mock`
+//! cargo feature `mock::MockService` (same method names; for UI development only). Extra Rust-side parameters (`State`, `AppHandle`,
 //! `Window`) may be added freely: the JS contract is only the argument names and the JSON results.
 //!
 //! Privacy: nothing here logs cookie values or note content, only names and counts.
 
+#[cfg(feature = "mock")]
 mod mock;
 
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use icloud_session::{CookieJar, StoredCookie};
@@ -18,8 +20,11 @@ use tauri::webview::NewWindowResponse;
 use tauri::{AppHandle, Emitter, Manager, State, Url, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_opener::OpenerExt;
 
-/// The backend behind the commands. Swapped for `notes_service::Service` in Wave 2.
+/// The backend behind the commands.
+#[cfg(feature = "mock")]
 type Backend = mock::MockService;
+#[cfg(not(feature = "mock"))]
+type Backend = notes_service::Service;
 type Shared<'a> = State<'a, Arc<Backend>>;
 
 const LOGIN_LABEL: &str = "login";
@@ -235,19 +240,68 @@ async fn serve_asset(svc: Arc<Backend>, req: Request<Vec<u8>>) -> Response<Vec<u
     }
 }
 
+/// Forwards service events to the UI as Tauri events.
+#[cfg(not(feature = "mock"))]
+struct TauriSink(AppHandle);
+
+#[cfg(not(feature = "mock"))]
+impl notes_service::EventSink for TauriSink {
+    fn emit(&self, event: notes_service::ServiceEvent) {
+        use notes_service::ServiceEvent as E;
+        let _ = match event {
+            E::SyncProgress(p) => self.0.emit("sync-progress", p),
+            E::SyncDone => self.0.emit("sync-done", ()),
+            E::AuthRequired => self.0.emit("auth-required", ()),
+        };
+    }
+}
+
+#[cfg(not(feature = "mock"))]
+fn open_backend(app: &AppHandle) -> Result<Backend, Box<dyn std::error::Error>> {
+    let dir = app.path().app_local_data_dir()?;
+    notes_service::Service::open(dir, Arc::new(TauriSink(app.clone()))).map_err(|e| e.message.into())
+}
+
+#[cfg(feature = "mock")]
+fn open_backend(_app: &AppHandle) -> Result<Backend, Box<dyn std::error::Error>> {
+    Ok(Backend::new())
+}
+
+/// Validate the stored session and sync in the background, then refresh periodically while focused.
+#[cfg(not(feature = "mock"))]
+fn start_backend(backend: Arc<Backend>, focused: Arc<AtomicBool>) {
+    tauri::async_runtime::spawn(async move {
+        if let Err(e) = backend.start().await {
+            tracing::info!(code = ?e.code, "start: not syncing");
+        }
+        // Detached for the life of the app.
+        drop(backend.spawn_periodic_refresh(notes_service::REFRESH_EVERY, move || focused.load(Ordering::Relaxed)));
+    });
+}
+
+#[cfg(feature = "mock")]
+fn start_backend(_backend: Arc<Backend>, _focused: Arc<AtomicBool>) {}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let backend = Arc::new(Backend::new());
-    let for_protocol = backend.clone();
+    let focused = Arc::new(AtomicBool::new(true));
+    let focus_flag = focused.clone();
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(backend)
-        .register_asynchronous_uri_scheme_protocol("notes-asset", move |_ctx, req, responder| {
-            let svc = for_protocol.clone();
+        .on_window_event(move |w, ev| {
+            if let (MAIN_LABEL, tauri::WindowEvent::Focused(f)) = (w.label(), ev) {
+                focus_flag.store(*f, Ordering::Relaxed);
+            }
+        })
+        .register_asynchronous_uri_scheme_protocol("notes-asset", move |ctx, req, responder| {
+            let svc: Arc<Backend> = ctx.app_handle().state::<Arc<Backend>>().inner().clone();
             tauri::async_runtime::spawn(async move { responder.respond(serve_asset(svc, req).await) });
         })
-        .setup(|app| {
+        .setup(move |app| {
             let handle = app.handle().clone();
+            let backend = Arc::new(open_backend(&handle)?);
+            app.manage(backend.clone());
+            start_backend(backend, focused);
             // Built in code (not tauri.conf.json) so the navigation and new-window hooks can be attached.
             WebviewWindowBuilder::new(app, MAIN_LABEL, WebviewUrl::App("index.html".into()))
                 .title("iCloud Notes")

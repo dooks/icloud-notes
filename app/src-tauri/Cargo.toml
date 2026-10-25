@@ -14,6 +14,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build.workspace = true
 
+[features]
+# UI development only: canned data instead of iCloud.
+mock = []
+
 [dependencies]
 notes-model.workspace = true
 notes-service.workspace = true
