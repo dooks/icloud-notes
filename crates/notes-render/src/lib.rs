@@ -2,8 +2,7 @@
 //!
 //! We generate HTML ourselves and escape everything; nothing from the note is passed through as markup.
 
-// Wave 0 stubs: remove once implemented.
-#![allow(unused_variables)]
+mod render;
 
 use notes_proto::{Table, proto};
 
@@ -28,11 +27,11 @@ pub enum AttachmentView {
 
 /// Render a note body to an HTML **fragment** (no `<html>`/`<head>`).
 pub fn render_note(note: &proto::Note, resolver: &dyn AttachmentResolver) -> String {
-    todo!("WP-C")
+    render::render_note(note, resolver)
 }
 
 /// Wrap a fragment in a full document for the iframe's `srcdoc`: strict CSP, `<base target=_blank>`,
 /// Apple-Notes-like CSS, light or dark.
 pub fn page(fragment: &str, dark: bool) -> String {
-    todo!("WP-C")
+    render::page(fragment, dark)
 }
