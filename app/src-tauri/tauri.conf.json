@@ -8,16 +8,9 @@
   },
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-      {
-        "label": "main",
-        "title": "iCloud Notes",
-        "width": 1200,
-        "height": 800
-      }
-    ],
+    "windows": [],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; img-src 'self' notes-asset: http://notes-asset.localhost; frame-src 'self'; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {
