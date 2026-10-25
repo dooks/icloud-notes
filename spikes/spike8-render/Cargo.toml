@@ -1,0 +1,17 @@
+[package]
+name = "spike8-render"
+version = "0.1.0"
+edition = "2024"
+
+# src/decode.rs, build.rs and vendor/ are copied from spikes/spike3-decode (2026-10-25),
+# not path-linked, because spike 3 was still being edited while this spike ran.
+
+[dependencies]
+base64 = "0.23.1"
+flate2 = "1.1.10"
+prost = "0.14.4"
+serde_json = "1.0.154"
+
+[build-dependencies]
+prost-build = "0.14.4"
+protox = "0.10.0"

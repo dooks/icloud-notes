@@ -1,0 +1,4 @@
+﻿source: https://github.com/threeplanetssoftware/apple_cloud_notes_parser
+commit: 4754a2b62686570cca46690d101079e80cf6ae66
+files: proto/notestore.proto, LICENSE
+fetched: 2026-10-24

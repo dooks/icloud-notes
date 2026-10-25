@@ -1,0 +1,25 @@
+[package]
+name = "icloud-notes"
+description = "Read-only iCloud Notes for Windows"
+authors = ["ziggy"]
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+# The `_lib` suffix avoids a lib/bin name clash on Windows (rust-lang/cargo#8519).
+name = "icloud_notes_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build.workspace = true
+
+[dependencies]
+notes-model.workspace = true
+notes-service.workspace = true
+icloud-session.workspace = true
+tauri.workspace = true
+tauri-plugin-opener.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true

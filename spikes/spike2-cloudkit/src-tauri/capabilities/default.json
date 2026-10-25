@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "No IPC for the remote login page",
+  "windows": [],
+  "permissions": []
+}

@@ -1,0 +1,18 @@
+[package]
+name = "cloudkit"
+description = "Read-only CloudKit web client for the private Notes zone (four endpoints + asset GET)."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+notes-model.workspace = true
+icloud-session.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+httpmock.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread"] }

@@ -1,0 +1,9 @@
+[package]
+name = "notes-render"
+description = "Renders a decoded note (and its tables) to a sanitized HTML fragment and page."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+notes-proto.workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "notes-service"
+description = "Facade the app calls: startup, folders, note view, assets."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+notes-model.workspace = true
+notes-proto.workspace = true
+notes-render.workspace = true
+icloud-session.workspace = true
+cloudkit.workspace = true
+notes-store.workspace = true
+notes-sync.workspace = true
+tokio.workspace = true
+tracing.workspace = true

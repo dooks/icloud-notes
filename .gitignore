@@ -1,0 +1,17 @@
+# Build output
+target/
+out/
+
+# Secrets and private data: never commit
+*.dpapi
+spikes/*/out/
+*.sqlite
+*.sqlite-*
+
+# Tauri generated schemas
+app/src-tauri/gen/schemas
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea

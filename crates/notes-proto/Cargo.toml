@@ -1,0 +1,18 @@
+[package]
+name = "notes-proto"
+description = "Vendored NoteStoreProto schema plus note body and table decoding."
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+# build.rs and vendor/ are copied from spikes/spike3-decode (Wave 0).
+
+[dependencies]
+notes-model.workspace = true
+base64.workspace = true
+flate2.workspace = true
+prost.workspace = true
+
+[build-dependencies]
+prost-build.workspace = true
+protox.workspace = true

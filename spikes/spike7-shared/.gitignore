@@ -1,0 +1,4 @@
+# out/ holds raw personal note data from CloudKit.
+out/
+src-tauri/target/
+src-tauri/gen/

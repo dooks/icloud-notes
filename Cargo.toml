@@ -1,0 +1,64 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/notes-model",
+    "crates/notes-proto",
+    "crates/notes-render",
+    "crates/icloud-session",
+    "crates/cloudkit",
+    "crates/notes-store",
+    "crates/notes-sync",
+    "crates/notes-service",
+    "app/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+# Internal crates
+notes-model = { path = "crates/notes-model" }
+notes-proto = { path = "crates/notes-proto" }
+notes-render = { path = "crates/notes-render" }
+icloud-session = { path = "crates/icloud-session" }
+cloudkit = { path = "crates/cloudkit" }
+notes-store = { path = "crates/notes-store" }
+notes-sync = { path = "crates/notes-sync" }
+notes-service = { path = "crates/notes-service" }
+
+# Decode
+prost = "0.14.4"
+prost-build = "0.14.4"
+protox = "0.10.0"
+flate2 = "1.1"
+base64 = "0.23"
+
+# Common
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tokio = { version = "1.54", features = ["sync", "time", "macros", "rt"] }
+
+# I/O
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "http2", "charset"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_Security_Cryptography"] }
+
+# App
+tauri = { version = "2.12", features = [] }
+tauri-build = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+
+# Dev
+httpmock = "0.9"
+
+# Profiles must live at the workspace root (moved here from the Tauri scaffold).
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

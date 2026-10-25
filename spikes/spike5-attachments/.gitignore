@@ -1,0 +1,6 @@
+/target
+/out
+/gen
+*.json
+!tauri.conf.json
+!capabilities/*.json
