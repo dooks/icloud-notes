@@ -1813,6 +1813,7 @@ dependencies = [
 name = "icloud-session"
 version = "0.1.0"
 dependencies = [
+ "cookie",
  "httpmock",
  "notes-model",
  "reqwest 0.12.28",
