@@ -2503,13 +2503,17 @@ dependencies = [
 name = "notes-service"
 version = "0.1.0"
 dependencies = [
+ "base64 0.23.1",
  "cloudkit",
+ "flate2",
  "icloud-session",
  "notes-model",
  "notes-proto",
  "notes-render",
  "notes-store",
  "notes-sync",
+ "prost",
+ "serde_json",
  "tokio",
  "tracing",
 ]

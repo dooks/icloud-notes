@@ -141,24 +141,13 @@ async fn search(svc: Shared<'_>, q: String) -> Result<Vec<NoteSummary>, CmdError
 /// `note_html {noteId, dark}` → `{title, html}` (a full page for `srcdoc`).
 #[tauri::command]
 async fn note_html(svc: Shared<'_>, note_id: String, dark: bool) -> Result<NoteHtml, CmdError> {
-    let mut page = svc.note_html(&note_id, dark)?;
-    page.html = webview_asset_urls(&page.html);
-    Ok(page)
+    svc.note_html(&note_id, dark)
 }
 
 /// `open_link {url}`: re-check the scheme (http/https/mailto only), then open in the OS browser.
 #[tauri::command]
 async fn open_link(app: AppHandle, url: String) -> Result<(), CmdError> {
     open_checked(&app, &url)
-}
-
-/// WebView2 does not resolve `notes-asset://localhost/…` (verified: images fail to load); Tauri serves custom
-/// protocols there as `http://notes-asset.localhost/…`. Rewrite the page the renderer produced, including the
-/// `img-src` of its own CSP, so renderer and UI keep the `notes-asset://` contract.
-fn webview_asset_urls(html: &str) -> String {
-    html.replace("notes-asset://localhost/", "http://notes-asset.localhost/")
-        .replace("img-src notes-asset:", "img-src http://notes-asset.localhost notes-asset:")
-        .replace("img-src 'self' notes-asset:", "img-src 'self' http://notes-asset.localhost notes-asset:")
 }
 
 /// Parse `url` and accept only http, https and mailto.
@@ -299,14 +288,6 @@ mod tests {
         ] {
             assert!(check_link(bad).is_none(), "{bad}");
         }
-    }
-
-    #[test]
-    fn asset_urls_are_rewritten() {
-        let h = r#"<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src notes-asset:"><img src="notes-asset://localhost/a/thumb">"#;
-        let out = webview_asset_urls(h);
-        assert!(out.contains(r#"src="http://notes-asset.localhost/a/thumb""#));
-        assert!(out.contains("img-src http://notes-asset.localhost notes-asset:"));
     }
 
     #[test]

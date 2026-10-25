@@ -224,7 +224,7 @@ fn last_paragraph_without_newline() {
 #[test]
 fn image_attachment() {
     let r = fake(AttachmentView::Image {
-        src: "notes-asset://localhost/ABC-1/full".into(),
+        src: "http://notes-asset.localhost/ABC-1/full".into(),
         w: Some(640),
         h: None,
         alt: "a \"pic\"".into(),
@@ -232,7 +232,7 @@ fn image_attachment() {
     let h = html_with(&[("\u{FFFC}", att("ABC-1", "public.png")), ("\n", run("\n"))], &r);
     assert_eq!(
         h,
-        "<p><img loading=\"lazy\" src=\"notes-asset://localhost/ABC-1/full\" alt=\"a &quot;pic&quot;\" width=\"640\"></p>\n"
+        "<p><img loading=\"lazy\" src=\"http://notes-asset.localhost/ABC-1/full\" alt=\"a &quot;pic&quot;\" width=\"640\"></p>\n"
     );
     // A src that isn't our scheme never reaches the page.
     let r = fake(AttachmentView::Image { src: "https://evil/x.png".into(), w: None, h: None, alt: String::new() });
