@@ -541,9 +541,8 @@ mod tests {
         assert!(matches!(download_via(&plain, &asset("/asset/gone", 5)).await, Err(ApiError::Http(_))));
     }
 
-    /// Needs WP-D's real `Session` (the Wave 0 stubs `todo!()`). Run after the merge with `--ignored`.
+    /// Exercises WP-D's real `Session` (cookie jar, headers, Set-Cookie absorb) against a mock server.
     #[tokio::test]
-    #[ignore = "requires icloud-session bodies (WP-D)"]
     async fn end_to_end_with_real_session() {
         use icloud_session::{CookieJar, StoredCookie};
         let server = MockServer::start();
