@@ -8,7 +8,28 @@
     <script type="module" src="app.js"></script>
   </head>
   <body>
-    <!-- WP-I: folder list, note list, note view (sandboxed iframe). -->
-    <main id="app"></main>
+    <header class="toolbar">
+      <button id="nav-back" class="icon-btn narrow-only" type="button" aria-label="Back" hidden>‹</button>
+      <input id="search" type="search" placeholder="Search" aria-label="Search notes" autocomplete="off" spellcheck="false" />
+      <button id="refresh" class="btn" type="button">
+        <span class="spinner" aria-hidden="true"></span><span id="refresh-label">Refresh</span>
+      </button>
+    </header>
+    <main id="app" data-view="notes">
+      <nav id="folders-pane" class="pane" aria-label="Folders"><ul id="folders" class="list" role="listbox"></ul></nav>
+      <section id="notes-pane" class="pane" aria-label="Notes">
+        <div id="notes-heading" class="pane-heading"></div>
+        <ul id="notes" class="list" role="listbox" tabindex="0"></ul>
+        <p id="notes-empty" class="empty" hidden></p>
+      </section>
+      <article id="note-pane" class="pane" aria-label="Note">
+        <p id="note-empty" class="empty">Select a note</p>
+        <iframe id="note-frame" title="Note" sandbox="allow-popups" hidden></iframe>
+      </article>
+    </main>
+    <footer class="statusbar">
+      <span id="status-text">Starting…</span>
+      <button id="signin" class="btn" type="button" hidden>Sign in</button>
+    </footer>
   </body>
 </html>
