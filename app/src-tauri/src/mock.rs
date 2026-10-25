@@ -135,7 +135,7 @@ impl MockService {
         let n = NOTES.iter().find(|n| n.id == note_id).ok_or_else(|| CmdError::internal("no such note"))?;
         let (bg, fg) = if dark { ("#1e1e1e", "#eee") } else { ("#fff", "#111") };
         let img = if n.attachment {
-            "<p><img src=\"notes-asset://localhost/att1/original\" width=\"64\" height=\"64\" alt=\"synthetic image\"></p>"
+            "<p><img src=\"http://notes-asset.localhost/att1/original\" width=\"64\" height=\"64\" alt=\"synthetic image\"></p>"
         } else {
             ""
         };

@@ -4,6 +4,10 @@
 
 mod render;
 
+/// Where attachment images are served from. WebView2 cannot load `notes-asset://localhost/…`; Tauri serves the
+/// `notes-asset` protocol there as `http://notes-asset.localhost/…`, so pages use that form and `page()`'s CSP allows it.
+pub const ASSET_BASE: &str = "http://notes-asset.localhost/";
+
 use notes_proto::{Table, proto};
 
 /// How an attachment found in the body should be shown. Provided by `notes-service`.
@@ -15,7 +19,7 @@ pub trait AttachmentResolver {
 /// What the renderer emits for one attachment.
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttachmentView {
-    /// `src` is always `notes-asset://localhost/<attachment-id>/<variant>`, never a URL from note content.
+    /// `src` is always `http://notes-asset.localhost/<attachment-id>/<variant>` ([`ASSET_BASE`]), never a URL from note content.
     Image { src: String, w: Option<u32>, h: Option<u32>, alt: String },
     /// Rendered as `<table>`; each cell uses the same inline renderer as the body.
     Table(Table),

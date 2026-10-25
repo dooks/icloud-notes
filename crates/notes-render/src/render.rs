@@ -277,7 +277,7 @@ fn push_attachment(out: &mut String, run: &AttributeRun, r: &dyn AttachmentResol
     let uti = if ok_token(uti, ".-", 128) { uti } else { "" };
     match r.resolve(id, uti) {
         AttachmentView::Image { src, w, h, alt } => {
-            if !src.starts_with("notes-asset://localhost/") {
+            if !src.starts_with(crate::ASSET_BASE) {
                 push_placeholder(out, "image");
                 return false;
             }
@@ -592,7 +592,7 @@ td { border: 1px solid var(--line); padding: .3em .6em; vertical-align: top; min
 /// A standalone page. The CSP blocks scripts, fonts and network; images only from our asset scheme.
 pub fn page(fragment: &str, dark: bool) -> String {
     let mut s = String::from(if dark { "<!doctype html>\n<html class=\"dark\"><head><meta charset=\"utf-8\">\n" } else { "<!doctype html>\n<html><head><meta charset=\"utf-8\">\n" });
-    s.push_str("<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src notes-asset: http://notes-asset.localhost\">\n");
+    s.push_str("<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; img-src http://notes-asset.localhost\">\n");
     s.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<base target=\"_blank\">\n<style>");
     s.push_str(CSS);
     s.push_str("</style></head>\n<body>\n");

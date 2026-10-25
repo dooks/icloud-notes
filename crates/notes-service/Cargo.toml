@@ -15,3 +15,9 @@ notes-store.workspace = true
 notes-sync.workspace = true
 tokio.workspace = true
 tracing.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+flate2.workspace = true
+base64.workspace = true
+prost.workspace = true

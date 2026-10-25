@@ -144,7 +144,7 @@ Steps:
 ### 3.3 `notes-render` public API
 - `trait AttachmentResolver { fn resolve(&self, id: &str, uti: &str) -> AttachmentView; }`
 - `enum AttachmentView { Image { src: String, w: Option<u32>, h: Option<u32>, alt: String }, Table(Table), Text(String), Placeholder { kind: String } }`.
-  `src` is always `notes-asset://localhost/<attachment-id>/<variant>`.
+  `src` is always `http://notes-asset.localhost/<attachment-id>/<variant>` (`notes_render::ASSET_BASE`). WebView2 cannot load `notes-asset://localhost/…`; Tauri serves the `notes-asset` protocol there as `http://notes-asset.localhost/…`, so the renderer emits that form directly and `page()`'s CSP is `img-src http://notes-asset.localhost`. The host does no URL rewriting.
 - `fn render_note(&proto::Note, &dyn AttachmentResolver) -> String` returns an HTML **fragment**.
 - `fn page(fragment: &str, dark: bool) -> String` returns a full document with CSP and CSS, for the iframe's `srcdoc`.
 
@@ -188,7 +188,8 @@ Rust side (`app\src-tauri\src\lib.rs`): each command is `async fn …(args) -> R
     - `DecodedBody { proto, plain_text }`
     - `HydrateReport { done, failed, remaining }`
 - **`notes-service`** (stub for WP-J; WP-H's `MockService` mirrors these method names):
-  - `Service::open(data_dir, Arc<dyn EventSink>)`, `start`, `status`, `signed_in(CookieJar)`, `sign_out`, `refresh`, `folders`, `notes(folder_id)`, `search(q)`, `note_html(note_id, dark)`, `asset(attachment_id, AssetVariant) -> (bytes, mime)`
+  - `Service` is `Core<CloudKitClient>`; `Core<A: CloudKitApi>` (with `with_parts(data_dir, events, jar_store, connect)`) lets tests use fakes. Reads use their own SQLite connection, so they never wait for a sync. Extras: `wait_idle()`, `spawn_periodic_refresh(every, focused)`.
+  - `Service::open(data_dir, Arc<dyn EventSink>)`, `start`, `status`, `signed_in(CookieJar)`, `sign_out`, `refresh`, `folders`, `notes(folder_id)`, `search(q)`, `note_html(note_id, dark)`, `asset(attachment_id, AssetVariant) -> (bytes, mime)` (served as `http://notes-asset.localhost/<id>/<variant>`; for `Thumb`, `<id>` may be a note recordName)
   - All return `CmdError`.
   - `trait EventSink: Send + Sync { fn emit(&self, ServiceEvent) }` with `ServiceEvent = SyncProgress(SyncProgress) | SyncDone | AuthRequired`.
 
@@ -289,7 +290,7 @@ Rust side (`app\src-tauri\src\lib.rs`): each command is `async fn …(args) -> R
 - **Login window:** a separate WebviewWindow on `https://www.icloud.com` with the default persistent profile (never incognito). Poll `cookies_for_url("https://setup.icloud.com/setup/ws/1/validate")` until `X-APPLE-WEBAUTH-TOKEN` appears. Port the logic from `spikes\spike1-login` and `spikes\spike4-session\login`. Hand the cookies over to a `CookieJar`, close the window, and emit `sign-in-done`. Give this window **no capabilities**.
 - **Main window:** loads `app\ui`.
   - Capabilities: only the commands in §3.4.
-  - CSP: `default-src 'self'; img-src 'self' notes-asset:; frame-src 'self'; style-src 'self' 'unsafe-inline'`.
+  - CSP: `default-src 'self'; img-src 'self' notes-asset: http://notes-asset.localhost; frame-src 'self'; style-src 'self' 'unsafe-inline'`.
   - `on_navigation` denies everything except the app's own origin.
   - `on_new_window` always denies, and passes http/https/mailto URLs to the OS opener after the scheme check. This is how links in note iframes open (see WP-I).
 - **`notes-asset://` custom protocol:** parse `<attachment-id>/<variant>` (variant ∈ `original|preview-light|preview-dark|fallback|thumb`). Resolve it **only** through `notes-service`, never through a URL taken from note content. Serve the right content type, sniffed from magic bytes.
@@ -324,7 +325,7 @@ Merge order: skeleton → A, B, C, D, E, F, G (all crates) → H, I.
 - `note_html(id, dark)`:
   1. Load the body proto and decode it.
   2. Build an `AttachmentResolver` from the store's Attachment, Media and InlineAttachment records:
-     - image → `Image{src: notes-asset://…/original}`
+     - image → `Image{src: http://notes-asset.localhost/<id>/original}`
      - table → `decode_table`
      - drawing.2 and paper → `fallback`, else `preview-{light|dark}` (pick the preview by its `PreviewAppearances` value, not its position)
      - calculateresult and hashtag → `Text(AltTextEncrypted / DisplayTextEncrypted)`
