@@ -304,7 +304,7 @@ pub fn run() {
             start_backend(backend, focused);
             // Built in code (not tauri.conf.json) so the navigation and new-window hooks can be attached.
             WebviewWindowBuilder::new(app, MAIN_LABEL, WebviewUrl::App("index.html".into()))
-                .title("iCloud Notes")
+                .title("StarNotes")
                 .inner_size(1200.0, 800.0)
                 .on_navigation(is_app_origin)
                 .on_new_window(move |url, _features| {

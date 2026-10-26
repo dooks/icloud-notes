@@ -85,7 +85,7 @@ pub struct Core<A: CloudKitApi + Send + Sync + 'static> {
 pub type Service = Core<CloudKitClient>;
 
 impl Service {
-    /// Open the cache and jar under `data_dir` (`%LOCALAPPDATA%\com.ziggy.icloud-notes`). No network.
+    /// Open the cache and jar under `data_dir` (`%LOCALAPPDATA%\com.ziggy.starnotes`). No network.
     pub fn open(data_dir: PathBuf, events: Arc<dyn EventSink>) -> Result<Self, CmdError> {
         let jars = DpapiStore::new(data_dir.join("session.dpapi"));
         let persist = jars.clone();

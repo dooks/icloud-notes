@@ -118,7 +118,7 @@ impl SqliteStore {
         .map_err(StoreError::from)
     }
 
-    /// `%LOCALAPPDATA%\com.ziggy.icloud-notes\cache.sqlite`.
+    /// `%LOCALAPPDATA%\com.ziggy.starnotes\cache.sqlite`.
     pub fn default_path() -> PathBuf {
         let base = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
         base.join(APP_ID).join("cache.sqlite")

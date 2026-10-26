@@ -1,4 +1,4 @@
-# iCloud Notes for Windows: build plan
+# StarNotes: build plan (read-only iCloud Notes for Windows)
 
 A native Windows app (Rust + Tauri 2) that signs into **one** iCloud account and shows its Apple Notes **read-only**: no editing, no folder management, and no writes to Apple of any kind.
 
@@ -129,7 +129,7 @@ Steps:
   `ApiError = Auth(AuthError) | Ck(CkError) | Http(String)`. `Http` means "offline" to the UI.
 - Also in `notes-model` (added in Wave 0, shared by the service, the host and its mock):
   - `fn string(&CkRecord, key)` for plain `STRING` fields; `ChangeItem::name()`.
-  - Constants `QUICK_NOTES_VIEW_ID = "quick-notes"` (the Quick Notes `FolderView.id`), `APP_ID = "com.ziggy.icloud-notes"` (folder under `%LOCALAPPDATA%`), `NOTES_ZONE = "Notes"`.
+  - Constants `QUICK_NOTES_VIEW_ID = "quick-notes"` (the Quick Notes `FolderView.id`), `APP_ID = "com.ziggy.starnotes"` (folder under `%LOCALAPPDATA%`), `NOTES_ZONE = "Notes"`.
   - Command types (`view.rs`, camelCase JSON): `Status`, `RefreshResult`, `NoteHtml`, `SyncProgress`, `CmdError { code: CmdErrorCode, message }` with `From` for every error type, and `AssetVariant` (`original|preview-light|preview-dark|fallback|thumb`, `parse`/`as_str`).
   - `FolderKind` JSON is `{"system":"default"|"trash"|"quickNotes"}` or `"user"`. `NoteSummary.modified` is ms since the epoch (`i64`). `AttachmentId` is an alias for `RecordName`.
 
@@ -357,7 +357,7 @@ Merge order: skeleton → A, B, C, D, E, F, G (all crates) → H, I.
 
 - **WP-L, packaging:**
   - `cargo tauri build` produces an NSIS installer (per-user, no admin).
-  - App identifier `com.ziggy.icloud-notes`, plus an icon.
+  - App identifier `com.ziggy.starnotes`, plus an icon.
   - Confirm the WebView2 bootstrapper setting.
 - **WP-M, open data questions** (needs the user's phone; each check is ≤30 min):
   1. An interrupted then continued numbered list, to settle the `ps7` rule. Adjust WP-C if needed.

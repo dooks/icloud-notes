@@ -22,7 +22,7 @@ pub const SETUP_BASE: &str = "https://setup.icloud.com";
 /// Browser UA sent to Apple (not required by the server, but matches what the web app sends).
 pub const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0";
 
-const APP_DIR: &str = "com.ziggy.icloud-notes";
+const APP_DIR: &str = "com.ziggy.starnotes";
 const STORE_FILE: &str = "session.dpapi";
 
 fn now() -> i64 {
@@ -169,7 +169,7 @@ mod dpapi {
     use windows::core::w;
 
     // Extra entropy so another app running as the same user can't just call CryptUnprotectData blindly.
-    const ENTROPY: &[u8] = b"icloud-notes-session";
+    const ENTROPY: &[u8] = b"starnotes-session";
 
     fn blob(d: &[u8]) -> CRYPT_INTEGER_BLOB {
         CRYPT_INTEGER_BLOB { cbData: d.len() as u32, pbData: d.as_ptr() as *mut u8 }
@@ -189,7 +189,7 @@ mod dpapi {
         let (input, entropy) = (blob(data), blob(ENTROPY));
         let mut out = CRYPT_INTEGER_BLOB::default();
         unsafe {
-            CryptProtectData(&input, w!("icloud-notes session"), Some(&entropy), None, None, CRYPTPROTECT_UI_FORBIDDEN, &mut out)?;
+            CryptProtectData(&input, w!("starnotes session"), Some(&entropy), None, None, CRYPTPROTECT_UI_FORBIDDEN, &mut out)?;
             Ok(take(out))
         }
     }
@@ -214,7 +214,7 @@ pub fn unprotect(data: &[u8]) -> Result<Vec<u8>, SessionError> {
     dpapi::unprotect(data).map_err(|e| SessionError::Dpapi(format!("CryptUnprotectData: {e}")))
 }
 
-/// The jar on disk: `%LOCALAPPDATA%\com.ziggy.icloud-notes\session.dpapi`, DPAPI-encrypted JSON.
+/// The jar on disk: `%LOCALAPPDATA%\com.ziggy.starnotes\session.dpapi`, DPAPI-encrypted JSON.
 #[derive(Debug, Clone)]
 pub struct DpapiStore {
     path: PathBuf,
@@ -225,7 +225,7 @@ impl DpapiStore {
         DpapiStore { path: path.into() }
     }
 
-    /// `%LOCALAPPDATA%\com.ziggy.icloud-notes\session.dpapi`.
+    /// `%LOCALAPPDATA%\com.ziggy.starnotes\session.dpapi`.
     pub fn default_path() -> PathBuf {
         let base = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
         base.join(APP_DIR).join(STORE_FILE)
@@ -528,7 +528,7 @@ mod tests {
     #[test]
     fn default_path_shape() {
         let p = DpapiStore::default_path();
-        assert!(p.ends_with(r"com.ziggy.icloud-notes\session.dpapi") || p.ends_with("com.ziggy.icloud-notes/session.dpapi"));
+        assert!(p.ends_with(r"com.ziggy.starnotes\session.dpapi") || p.ends_with("com.ziggy.starnotes/session.dpapi"));
     }
 
     // Spike 4's failure table, row by row.
