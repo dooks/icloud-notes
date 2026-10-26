@@ -177,39 +177,4 @@ mod tests {
         assert!(matches!(decode_note(&[0xff, 0xff]), Err(DecodeError::Protobuf(_))));
         assert!(matches!(decode_note(&[0x12, 0x09, 0x00]), Err(DecodeError::Protobuf(_))));
     }
-
-    /// Stats only; never prints content. Run: `cargo test -p notes-proto -- --ignored`.
-    #[test]
-    #[ignore]
-    fn spike2_pages_all_decode() {
-        let dir = std::path::Path::new(r"C:\Users\ziggy\Projects\starnotes\spikes\spike2-cloudkit\out");
-        let (mut ok, mut total) = (0usize, 0usize);
-        let mut seen = std::collections::HashSet::new();
-        for entry in std::fs::read_dir(dir).unwrap() {
-            let path = entry.unwrap().path();
-            let name = path.file_name().unwrap().to_string_lossy().into_owned();
-            if !(name.starts_with("changes-zone-page-") && name.ends_with(".json")) {
-                continue;
-            }
-            let v: serde_json::Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
-            for zone in v["zones"].as_array().into_iter().flatten() {
-                for r in zone["records"].as_array().into_iter().flatten() {
-                    let name = r["recordName"].as_str().unwrap_or_default();
-                    if r["recordType"] != "Note" || !seen.insert(name.to_string()) {
-                        continue;
-                    }
-                    let Some(b64) = r["fields"]["TextDataEncrypted"]["value"].as_str() else {
-                        continue;
-                    };
-                    total += 1;
-                    if inflate(b64).and_then(|b| decode_note(&b)).is_ok() {
-                        ok += 1;
-                    }
-                }
-            }
-        }
-        eprintln!("decoded {ok}/{total}");
-        assert_eq!(total, 240);
-        assert_eq!(ok, total);
-    }
 }
