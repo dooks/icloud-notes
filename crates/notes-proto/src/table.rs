@@ -520,7 +520,7 @@ mod tests {
     #[ignore]
     fn real_tables_decode() {
         let dir = std::path::Path::new(
-            r"C:\Users\ziggy\Projects\icloud-notes\spikes\spike2-cloudkit\out",
+            r"C:\Users\ziggy\Projects\starnotes\spikes\spike2-cloudkit\out",
         );
         let (mut ok, mut total, mut mismatched) = (0, 0, 0);
         for f in std::fs::read_dir(dir).unwrap().flatten() {
